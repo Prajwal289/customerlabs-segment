@@ -1,15 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import './SaveSegmentModal.css';
 
-/*
-  Implements:
-  - segment name
-  - base dropdown "Add schema to segment"
-  - "+ Add new schema" adds the selected option as a new dropdown inside the blue box
-  - new dropdowns can change; they only show options that remain unselected
-  - save sends data to webhook (replace webhook URL)
-*/
-
 const ALL_OPTIONS = [
   { label: 'First Name', value: 'first_name' },
   { label: 'Last Name', value: 'last_name' },
@@ -20,31 +11,26 @@ const ALL_OPTIONS = [
   { label: 'State', value: 'state' }
 ];
 
-// Replace with your webhook from https://webhook.site/
-const WEBHOOK_URL = 'REPLACE_WITH_YOUR_WEBHOOK_URL';
+// const WEBHOOK_URL = 'https://webhook.site/a56b8fca-d0b2-429d-b92d-dc48115a7fd5';
+const WEBHOOK_URL = 'https://hook.eu2.make.com/g9tbogfa7ie37qk1gqetuo5ubzpygftd';
+
 
 function SaveSegmentModal({ onClose }) {
   const [segmentName, setSegmentName] = useState('');
   const [baseSelect, setBaseSelect] = useState('');
-  // array of selections for the blue box; each item is an object {id, value}
   const [addedSchemas, setAddedSchemas] = useState([]);
 
-  // compute selected values to remove from other dropdowns
   const selectedSet = useMemo(() => {
     const s = new Set();
     if (baseSelect) s.add(baseSelect);
     addedSchemas.forEach(a => { if (a.value) s.add(a.value); });
     return s;
   }, [baseSelect, addedSchemas]);
-
-  // options for base select are those not currently chosen in addedSchemas
   const baseOptions = ALL_OPTIONS.filter(opt => !addedSchemas.some(a => a.value === opt.value));
 
   function handleAddNewSchema() {
     if (!baseSelect) return;
-    // add a new schema entry with unique id
     setAddedSchemas(prev => [...prev, { id: Date.now() + Math.random(), value: baseSelect }]);
-    // reset base select and keep it showing only unselected options
     setBaseSelect('');
   }
 
@@ -94,10 +80,8 @@ function SaveSegmentModal({ onClose }) {
     }
   }
 
-  // For each added dropdown, compute available options: all options not selected by others (except keep current selection)
   function optionsForAdded(currentValue) {
     return ALL_OPTIONS.filter(opt => {
-      // allow the current value (so existing selection stays present) OR not selected elsewhere
       const usedElsewhere = addedSchemas.some(a => a.value === opt.value && a.value !== currentValue);
       return !usedElsewhere;
     });
